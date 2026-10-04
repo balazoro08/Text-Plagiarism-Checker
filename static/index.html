@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlagCheck AI - Text Plagiarism & Similarity Engine</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dark-theme">
+    <!-- Navbar Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>PlagCheck <span class="badge-ai">PRO</span></h1>
+                    <p class="tagline">TF-IDF & Cosine Similarity Analysis Engine</p>
+                </div>
+            </div>
+
+            <nav class="nav-tabs">
+                <button class="nav-btn active" data-tab="single-cmp"><i class="fa-solid fa-arrows-split-up-and-left"></i> Document Comparison</button>
+                <button class="nav-btn" data-tab="matrix-cmp"><i class="fa-solid fa-border-all"></i> Multi-Doc Matrix</button>
+                <button class="nav-btn" data-tab="presets"><i class="fa-solid fa-vial"></i> Demo Presets</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-content">
+
+        <!-- TAB 1: Single Comparison View -->
+        <div id="tab-single-cmp" class="tab-pane active">
+            <!-- Sample Loader Bar -->
+            <div class="quick-sample-bar">
+                <span class="sample-label"><i class="fa-solid fa-bolt"></i> Quick Load Sample:</span>
+                <div class="sample-buttons-group" id="quick-sample-buttons">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Dual Editor Input Grid -->
+            <div class="editor-grid">
+                <!-- Document 1 Container -->
+                <div class="editor-card" id="card-doc1">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fa-solid fa-file-lines doc-icon"></i>
+                            <span>Original Source (Document A)</span>
+                        </div>
+                        <div class="editor-actions">
+                            <span class="stat-badge" id="stats-doc1">0 words | 0 chars</span>
+                            <label class="btn-icon" title="Upload Document (.txt, .pdf, .docx)">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+                                <input type="file" id="file-input-doc1" accept=".txt,.pdf,.docx" hidden>
+                            </label>
+                            <button class="btn-icon" id="clear-doc1" title="Clear Text"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                    <div class="editor-wrapper">
+                        <textarea id="text-doc1" placeholder="Paste original reference text here or drag & drop a file (.txt, .pdf, .docx)..."></textarea>
+                        <div class="drop-overlay" id="drop-doc1">
+                            <i class="fa-solid fa-file-circle-plus"></i>
+                            <p>Drop file here to import</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document 2 Container -->
+                <div class="editor-card" id="card-doc2">
+                    <div class="editor-header">
+                        <div class="editor-title">
+                            <i class="fa-solid fa-file-pen doc-icon"></i>
+                            <span>Suspect Document (Document B)</span>
+                        </div>
+                        <div class="editor-actions">
+                            <span class="stat-badge" id="stats-doc2">0 words | 0 chars</span>
+                            <label class="btn-icon" title="Upload Document (.txt, .pdf, .docx)">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+                                <input type="file" id="file-input-doc2" accept=".txt,.pdf,.docx" hidden>
+                            </label>
+                            <button class="btn-icon" id="clear-doc2" title="Clear Text"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                    <div class="editor-wrapper">
+                        <textarea id="text-doc2" placeholder="Paste target comparison text here or drag & drop a file (.txt, .pdf, .docx)..."></textarea>
+                        <div class="drop-overlay" id="drop-doc2">
+                            <i class="fa-solid fa-file-circle-plus"></i>
+                            <p>Drop file here to import</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="action-bar">
+                <button id="btn-analyze" class="btn-primary">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Run Plagiarism Check</span>
+                </button>
+                <button id="btn-swap" class="btn-secondary" title="Swap Documents">
+                    <i class="fa-solid fa-right-left"></i> Swap
+                </button>
+                <button id="btn-reset-all" class="btn-secondary">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="analysis-loader" class="loader-container hidden">
+                <div class="spinner"></div>
+                <p>Vectorizing terms, computing TF-IDF matrix & sentence alignment...</p>
+            </div>
+
+            <!-- Results Dashboard Section -->
+            <section id="results-dashboard" class="results-section hidden">
+                <!-- Overview Row -->
+                <div class="overview-grid">
+                    <!-- Gauge Card -->
+                    <div class="dash-card score-card">
+                        <h3>Similarity Score</h3>
+                        <div class="gauge-container">
+                            <svg class="gauge-svg" viewBox="0 0 160 160">
+                                <circle class="gauge-bg" cx="80" cy="80" r="68"></circle>
+                                <circle class="gauge-fill" id="gauge-fill-circle" cx="80" cy="80" r="68" stroke-dasharray="427" stroke-dashoffset="427"></circle>
+                            </svg>
+                            <div class="gauge-text">
+                                <span id="gauge-val">0.0%</span>
+                                <span class="gauge-sub">Match Index</span>
+                            </div>
+                        </div>
+                        <div class="risk-badge-box">
+                            <span id="risk-badge" class="risk-badge">Analyzing...</span>
+                            <p id="risk-level-desc" class="risk-desc"></p>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="dash-card metrics-card">
+                        <h3>Analysis Breakdown</h3>
+                        <div class="metrics-grid">
+                            <div class="metric-box exact">
+                                <div class="metric-header">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Exact Matches</span>
+                                </div>
+                                <h4 id="metric-exact-count">0</h4>
+                                <p class="metric-sub">Verbatim sentences</p>
+                            </div>
+                            <div class="metric-box high">
+                                <div class="metric-header">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <span>Paraphrased</span>
+                                </div>
+                                <h4 id="metric-paraphrase-count">0</h4>
+                                <p class="metric-sub">Heavy rewording</p>
+                            </div>
+                            <div class="metric-box moderate">
+                                <div class="metric-header">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                    <span>Moderate Overlap</span>
+                                </div>
+                                <h4 id="metric-moderate-count">0</h4>
+                                <p class="metric-sub">Partial overlap</p>
+                            </div>
+                            <div class="metric-box unique">
+                                <div class="metric-header">
+                                    <i class="fa-solid fa-shield"></i>
+                                    <span>Original Content</span>
+                                </div>
+                                <h4 id="metric-unique-count">0</h4>
+                                <p class="metric-sub">Unique sentences</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detail Tabs Container -->
+                <div class="detail-tabs-card">
+                    <div class="detail-tab-nav">
+                        <button class="dtab-btn active" data-dtab="highlight-view"><i class="fa-solid fa-highlighter"></i> Sentence Highlighting</button>
+                        <button class="dtab-btn" data-dtab="keywords-view"><i class="fa-solid fa-key"></i> Shared TF-IDF Keywords</button>
+                        <button class="dtab-btn" data-dtab="table-view"><i class="fa-solid fa-table-list"></i> Sentence Pair Table</button>
+                        <button class="dtab-btn" data-dtab="stats-view"><i class="fa-solid fa-chart-simple"></i> Document Statistics</button>
+                        
+                        <div class="export-actions">
+                            <button id="btn-export-pdf" class="btn-sm"><i class="fa-solid fa-file-pdf"></i> Save Report</button>
+                            <button id="btn-export-json" class="btn-sm"><i class="fa-solid fa-code"></i> JSON</button>
+                        </div>
+                    </div>
+
+                    <!-- TAB CONTENTS -->
+                    <!-- 1. Highlight View -->
+                    <div id="dtab-highlight-view" class="dtab-content active">
+                        <div class="highlight-toolbar">
+                            <span class="legend-title"><i class="fa-solid fa-palette"></i> Highlight Filter:</span>
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn legend-exact" data-filter="exact">Exact (>=92%)</button>
+                            <button class="filter-btn legend-high" data-filter="high">Paraphrased (65-91%)</button>
+                            <button class="filter-btn legend-moderate" data-filter="moderate">Moderate (40-64%)</button>
+                            <button class="filter-btn" data-filter="unique">Clear Highlights</button>
+                            <span class="sync-scroll-indicator"><i class="fa-solid fa-link"></i> Hover sentence to view matching pair</span>
+                        </div>
+
+                        <div class="dual-viewer-grid">
+                            <div class="viewer-card">
+                                <div class="viewer-header">Document A (Original Source)</div>
+                                <div class="viewer-content" id="viewer-doc1"></div>
+                            </div>
+                            <div class="viewer-card">
+                                <div class="viewer-header">Document B (Suspect Comparison)</div>
+                                <div class="viewer-content" id="viewer-doc2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Keywords View -->
+                    <div id="dtab-keywords-view" class="dtab-content">
+                        <div class="keywords-header">
+                            <h4>Top Shared TF-IDF Terms & Weight Contributions</h4>
+                            <p>These terms carry the highest numerical weight in the document vector space, indicating core topic overlap.</p>
+                        </div>
+                        <div id="keywords-container" class="keywords-grid">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- 3. Table View -->
+                    <div id="dtab-table-view" class="dtab-content">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th>Document A Sentence</th>
+                                        <th>Best Match in Document B</th>
+                                        <th style="width: 110px;">Similarity</th>
+                                        <th style="width: 120px;">Classification</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sentence-table-body">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 4. Stats View -->
+                    <div id="dtab-stats-view" class="dtab-content">
+                        <div class="stats-comparison-grid">
+                            <div class="stats-table-card">
+                                <h4>Linguistic Profile Comparison</h4>
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Metric</th>
+                                            <th>Document A</th>
+                                            <th>Document B</th>
+                                            <th>Difference</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="stats-table-body">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB 2: Multi-Document Matrix Pane -->
+        <div id="tab-matrix-cmp" class="tab-pane">
+            <div class="matrix-container-card">
+                <div class="matrix-header">
+                    <h2><i class="fa-solid fa-border-all"></i> Multi-Document Similarity Matrix</h2>
+                    <p>Compare up to 8 documents simultaneously to construct an $N \times N$ similarity matrix heatmap.</p>
+                </div>
+
+                <div class="matrix-inputs" id="matrix-doc-list">
+                    <!-- Dynamic Document Rows -->
+                </div>
+
+                <div class="matrix-controls">
+                    <button id="btn-add-matrix-doc" class="btn-secondary"><i class="fa-solid fa-plus"></i> Add Document</button>
+                    <button id="btn-run-matrix" class="btn-primary"><i class="fa-solid fa-calculator"></i> Compute Matrix</button>
+                </div>
+
+                <div id="matrix-results-area" class="matrix-results hidden">
+                    <h3>Similarity Heatmap Matrix (%)</h3>
+                    <div class="table-responsive">
+                        <table class="matrix-table" id="matrix-table">
+                            <!-- Matrix content -->
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Presets Pane -->
+        <div id="tab-presets" class="tab-pane">
+            <div class="presets-container">
+                <h2><i class="fa-solid fa-flask-vial"></i> Benchmark Test Presets</h2>
+                <p>Select any pre-configured test scenario below to load and run instantaneous plagiarism analysis.</p>
+                
+                <div class="presets-grid" id="presets-cards-grid">
+                    <!-- Cards populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>PlagCheck AI &copy; 2026 | Built with Python, scikit-learn (TF-IDF & Cosine Similarity), Flask & Vanilla JS</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
