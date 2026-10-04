@@ -19,27 +19,6 @@ PlagCheck AI is an advanced Text Plagiarism Checker and similarity comparison we
 
 ---
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Python 3.9+
-- pip
-
-### 1. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Run the Web Server
-```bash
-python app.py
-```
-
-### 3. Open in Browser
-Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your web browser.
-
----
-
 ## 📁 Project Structure
 
 ```text
@@ -59,11 +38,7 @@ Open [http://127.0.0.1:5000](http://127.0.0.1:5000) in your web browser.
 
 ---
 
-## 🧪 Running Unit Tests
 
-```bash
-python test_plagiarism.py
-```
 
 ---
 
